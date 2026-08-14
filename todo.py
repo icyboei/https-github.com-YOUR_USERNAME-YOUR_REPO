@@ -129,6 +129,52 @@ def search_tasks(tasks, keyword):
     list_tasks(matches)
 
 
+def interactive_menu(filepath=DEFAULT_FILE):
+    """Run an interactive menu loop for terminal users."""
+    print("\n=========================================")
+    print("      Task Manager - Interactive Mode    ")
+    print("=========================================")
+
+    while True:
+        tasks = load_tasks(filepath)
+        print("\n1. List Tasks")
+        print("2. Add Task")
+        print("3. Mark Task Complete")
+        print("4. Delete Task")
+        print("5. Search Tasks")
+        print("6. Exit")
+        
+        choice = input("\nSelect an option (1-6): ").strip()
+
+        if choice == "1":
+            list_tasks(tasks)
+        elif choice == "2":
+            title = input("Enter task description: ").strip()
+            category = input("Enter category (default 'General'): ").strip() or "General"
+            priority = input("Enter priority (Low/Medium/High, default 'Medium'): ").strip() or "Medium"
+            add_task(tasks, title, category=category, priority=priority, filepath=filepath)
+        elif choice == "3":
+            tid = input("Enter task ID to mark done: ").strip()
+            if tid.isdigit():
+                complete_task(tasks, int(tid), filepath=filepath)
+            else:
+                print("Invalid task ID.")
+        elif choice == "4":
+            tid = input("Enter task ID to delete: ").strip()
+            if tid.isdigit():
+                delete_task(tasks, int(tid), filepath=filepath)
+            else:
+                print("Invalid task ID.")
+        elif choice == "5":
+            kw = input("Enter search keyword: ").strip()
+            search_tasks(tasks, kw)
+        elif choice == "6" or choice.lower() == "exit":
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid option. Please enter a number between 1 and 6.")
+
+
 def build_parser():
     """Create command line argument parser."""
     parser = argparse.ArgumentParser(description="Simple CLI Task Manager")
@@ -157,6 +203,9 @@ def build_parser():
     search_parser = subparsers.add_parser("search", help="Search tasks")
     search_parser.add_argument("keyword", type=str, help="Keyword to search")
 
+    # Interactive mode
+    subparsers.add_parser("interactive", help="Start interactive mode")
+
     return parser
 
 
@@ -176,8 +225,11 @@ def main():
         delete_task(tasks, args.id)
     elif args.command == "search":
         search_tasks(tasks, args.keyword)
+    elif args.command == "interactive":
+        interactive_menu()
     else:
-        parser.print_help()
+        # Default to interactive menu if no arguments passed
+        interactive_menu()
 
 
 if __name__ == "__main__":
